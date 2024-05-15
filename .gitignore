@@ -45,3 +45,9 @@ node_modules/
 /frontend/package-lock.json
 /frontend/*.iml
 /frontend/build
+
+### Additional Ignores ###
+.env
+.mvn/
+mvnw
+mvnw.cmd

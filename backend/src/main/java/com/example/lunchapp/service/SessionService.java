@@ -7,12 +7,13 @@ import com.example.lunchapp.repository.RestaurantRepository;
 import com.example.lunchapp.repository.SessionRepository;
 import com.example.lunchapp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 
 
 /**
@@ -110,7 +111,8 @@ public class SessionService {
         }
     }
 
-    public void addRestaurant(UUID sessionId, UUID userId, Restaurant restaurant) {
+    @Async
+    public CompletableFuture<Void> addRestaurantAsync(UUID sessionId, UUID userId, Restaurant restaurant) {
         log.debug("Adding restaurant to session {}, by user id {}", sessionId, userId);
         try {
             Session session = sessionRepository.findById(sessionId)
@@ -139,13 +141,14 @@ public class SessionService {
             log.error("Error occurred while adding restaurant to session id {} by user id {}", sessionId, userId, e);
             throw e;
         }
+        return CompletableFuture.completedFuture(null);
     }
 
     public Restaurant endSession(UUID sessionId, UUID userId) {
         log.debug("Starting endSession for session Id {} and user Id {}", sessionId, userId);
         Session session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new RuntimeException("Session not found"));
-        if (!session.getCreator().equals(userId)) {
+        if (!session.getCreator().getId().equals(userId)) {
             throw new IllegalStateException("Only the creator of the session can end the session.");
         }
         session.endSession();

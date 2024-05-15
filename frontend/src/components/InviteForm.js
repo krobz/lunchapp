@@ -1,31 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import api from '../services/api';
 
+/**
+ * Represents a form for inviting a user to a session.
+ *
+ * @param {Object} props - The properties for the InviteForm component.
+ * @param {string} props.sessionId - The ID of the session to invite the user to.
+ *
+ * @returns {JSX.Element} The InviteForm component.
+ */
 const InviteForm = ({ sessionId }) => {
-    const [userId, setUserId] = useState('');
-    const [userList, setUserList] = useState([]);
+    const [inviteeName, setInviteeName] = useState('');
 
-    useEffect(() => {
-        const getUsers = async () => {
-            try {
-                const response = await api.get('/users'); // API endpoint to get all users
-                setUserList(response.data);
-            } catch (error) {
-                console.error('Failed to fetch users', error);
-            }
-        };
-        getUsers();
-    }, []);
-
-    /**
-     * Handles inviting a user
-     *
-     * @returns {Promise} - A promise that resolves when the user is invited successfully or rejects with an error
-     */
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await api.post(`/${sessionId}/invite`, { sessionId, userId });
+            // Fetch the ID of the invitee using their name
+            const userResponse = await api.get(`/name/${inviteeName}`);
+            const inviteeId = userResponse.data.uuid;
+
+            const inviterId = localStorage.getItem('userId');
+
+            // Construct the invite request
+            const inviteUsersRequest = { inviterId, inviteeId };
+
+            // Call the invite API endpoint
+            await api.post(`sessions/${sessionId}/invite`, inviteUsersRequest);
+
             alert('User invited successfully!');
         } catch (error) {
             console.error('Failed to invite user', error);
@@ -34,13 +35,12 @@ const InviteForm = ({ sessionId }) => {
 
     return (
         <form onSubmit={handleSubmit}>
-            <select value={userId} onChange={(e) => setUserId(e.target.value)}>
-                {userList.map((user) => (
-                    <option key={user.uuid} value={user.uuid}>
-                        {user.name}
-                    </option>
-                ))}
-            </select>
+            <input
+                type="text"
+                placeholder="Enter the user's name"
+                value={inviteeName}
+                onChange={(e) => setInviteeName(e.target.value)}
+            />
             <button type="submit">Invite User</button>
         </form>
     );

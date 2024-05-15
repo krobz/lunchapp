@@ -2,11 +2,15 @@ package com.example.lunchapp.model;
 
 import lombok.*;
 import org.hibernate.annotations.Type;
+
 import javax.persistence.*;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
+/**
+ * The Session class represents a session in which users can participate and choose a restaurant to visit.
+ */
 @Data
 @Builder
 @NoArgsConstructor
@@ -34,6 +38,7 @@ public class Session {
     private List<User> participants;
 
     @OneToOne
+    @JoinColumn(name = "picked_restaurant_id")
     private Restaurant pickedRestaurant;
 
     private boolean isActive = false;
@@ -66,10 +71,8 @@ public class Session {
     public Restaurant getPickedRestaurant() {
         if (!isActive) {
             return this.pickedRestaurant;
-        }
-        else {
+        } else {
             throw new RuntimeException("Session is still running");
         }
     }
 }
-

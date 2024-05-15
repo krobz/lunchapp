@@ -1,5 +1,6 @@
 package com.example.lunchapp.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,11 +15,17 @@ import com.example.lunchapp.filter.ApiKeyFilter;
 @Configuration
 public class FilterConfig {
 
+    private final ApiKeyFilter apiKeyFilter;
+
+    @Autowired
+    public FilterConfig(ApiKeyFilter apiKeyFilter) {
+        this.apiKeyFilter = apiKeyFilter;
+    }
+
     @Bean
     public FilterRegistrationBean<ApiKeyFilter> apiKeyFilterOne(){
         FilterRegistrationBean<ApiKeyFilter> registrationBean = new FilterRegistrationBean<>();
-        registrationBean.setFilter(new ApiKeyFilter());
-        // add api used here
+        registrationBean.setFilter(apiKeyFilter);
         registrationBean.addUrlPatterns("/sessions/*");
         registrationBean.addUrlPatterns("/users/*");
         return registrationBean;

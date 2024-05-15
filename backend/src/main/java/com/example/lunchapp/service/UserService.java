@@ -3,8 +3,6 @@ package com.example.lunchapp.service;
 import com.example.lunchapp.model.User;
 import com.example.lunchapp.repository.UserRepository;
 import lombok.extern.log4j.Log4j2;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,8 +16,6 @@ import java.util.UUID;
 @Service
 @Log4j2
 public class UserService {
-
-    private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
 
@@ -41,6 +37,24 @@ public class UserService {
             return new RuntimeException("User not found");
         });
         log.debug("Found user with id {}", id);
+        return user;
+    }
+
+    /**
+     * Retrieves a user by their name.
+     *
+     * @param name The name of the user to retrieve.
+     * @return The User object found.
+     * @throws RuntimeException If the user with the given name is not found.
+     */
+    public User getUserByName(String name) {
+        log.debug("Executing getUserByName for name {}", name);
+        User user = userRepository.findByName(name);
+        if (user == null) {
+            log.error("User with name {} not found", name);
+            throw new RuntimeException("User not found");
+        }
+        log.debug("Found user with name {}", name);
         return user;
     }
 

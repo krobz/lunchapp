@@ -24,6 +24,9 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * LunchappApplicationTests is a class that contains test methods for testing the Lunch App application.
+ */
 @SpringBootTest
 class LunchappApplicationTests {
 
@@ -42,7 +45,6 @@ class LunchappApplicationTests {
 
     @Test
     void testCreateSession() {
-        // Mock repository behavior
         Session sessionToSave = new Session();
         User creator = new User();
         UUID creatorId = UUID.randomUUID();

@@ -2,9 +2,13 @@ package com.example.lunchapp.model;
 
 import lombok.*;
 import org.hibernate.annotations.Type;
+
 import javax.persistence.*;
 import java.util.UUID;
 
+/**
+ * The Restaurant class represents a restaurant that can be added to a session.
+ */
 @Data
 @Builder
 @NoArgsConstructor
@@ -15,7 +19,6 @@ public class Restaurant {
     @GeneratedValue
     @Type(type = "uuid-char")
     private UUID id;
-
 
     private String name;
 

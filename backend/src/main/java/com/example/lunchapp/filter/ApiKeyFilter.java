@@ -7,6 +7,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+
+/**
+ * This class implements the Filter interface to provide a filter for validating API keys.
+ * The filter checks the "X-API-KEY" header in the incoming request against a valid API key.
+ * If the API key is invalid or missing, it sends an HTTP UNAUTHORIZED response.
+ */
+@Component
 public class ApiKeyFilter implements Filter {
 
     @Value("${api.key}")
@@ -16,12 +23,12 @@ public class ApiKeyFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) servletRequest;
         String apiKey = req.getHeader("X-API-KEY");
-        if (apiKey == null || !apiKey.equals(validApiKey)) {
+        if (req.getMethod().equals("OPTIONS") || (apiKey != null && apiKey.equals(validApiKey))) {
+            filterChain.doFilter(servletRequest, servletResponse);
+        } else {
             HttpServletResponse res = (HttpServletResponse) servletResponse;
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             res.getWriter().write("Invalid API Key");
-            return;
         }
-        filterChain.doFilter(servletRequest, servletResponse);
     }
 }

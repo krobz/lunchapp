@@ -6,6 +6,7 @@ import com.example.lunchapp.dto.InviteUsersRequest;
 import com.example.lunchapp.model.Restaurant;
 import com.example.lunchapp.model.Session;
 import com.example.lunchapp.service.SessionService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +34,7 @@ public class SessionController {
         this.sessionService = sessionService;
     }
 
+    @Operation(summary = "Get all existing sessions")
     @GetMapping
     public List<Session> getAllSessions() {
         return sessionService.getAllSessions();
@@ -44,6 +46,7 @@ public class SessionController {
      * @param creatorId the ID of the user who is creating the session
      * @return a ResponseEntity object representing the HTTP response, with the created session as the response body
      */
+    @Operation(summary = "Creates a new session")
     @PostMapping("/create")
     public ResponseEntity<?> createSession(@RequestParam UUID creatorId) {
         log.debug("createSession API called with creatorId: {}", creatorId);
@@ -56,6 +59,15 @@ public class SessionController {
         }
     }
 
+    /**
+     * Invite a user to a session.
+     *
+     * @param sessionId       the UUID of the session to invite the user to
+     * @param request         the request object containing the inviter and invitee IDs
+     * @param bindingResult   the binding result of the request validation
+     * @return a ResponseEntity with the result of the invitation
+     */
+    @Operation(summary = "Invite a user to a session")
     @PostMapping("/{sessionId}/invite")
     public ResponseEntity<?> inviteUser(@PathVariable UUID sessionId, @Valid @RequestBody InviteUsersRequest request,
                                         BindingResult bindingResult) {
@@ -86,12 +98,13 @@ public class SessionController {
     }
 
     /**
-     * submit a restaurant to the session.
+     * submit a restaurant to a session.
      *
      * @param sessionId the unique identifier for the session
      * @param request the request containing the details of the restaurant to be added
      * @return a ResponseEntity object indicating the success or failure of the operation
      */
+    @Operation(summary = "submit a restaurant to a session")
     @PostMapping("/{sessionId}/restaurants")
     public synchronized ResponseEntity<?> addRestaurant(@PathVariable UUID sessionId, @Valid @RequestBody AddRestaurantRequest request,
                                                            BindingResult bindingResult) {
@@ -101,7 +114,7 @@ public class SessionController {
         }
 
         log.debug("addRestaurant is called for session Id {} and request {}", sessionId, request);
-        sessionService.addRestaurant(sessionId, request.getUserId(), request.getRestaurant());
+        sessionService.addRestaurantAsync(sessionId, request.getUserId(), request.getRestaurant());
         return ResponseEntity.ok().build();
     }
 
@@ -114,6 +127,7 @@ public class SessionController {
      * restaurant. If an illegal operation occurs, it returns a FORBIDDEN response with the error message. If the session or user is not found, it returns a NOT_FOUND response with
      * the error message. For other errors, it returns an INTERNAL_SERVER_ERROR response with a generic message.
      */
+    @Operation(summary = "Ends the session identified by the given session ID and user request")
     @PostMapping("/{sessionId}/end")
     public ResponseEntity<?> endSession(@PathVariable UUID sessionId, @Valid @RequestBody EndSessionRequest request,
                                         BindingResult bindingResult) {
@@ -133,7 +147,7 @@ public class SessionController {
             if (e.getMessage().equals("Session not found") || e.getMessage().equals("User not authorized")) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
             } else {
-                // TODO: Other erros should return a 500 status
+                // TODO: Other errors should return a 500 status
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
             }
         }

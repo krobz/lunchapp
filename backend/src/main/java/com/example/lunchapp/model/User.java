@@ -12,11 +12,14 @@ import javax.persistence.Id;
 import javax.validation.constraints.NotBlank;
 import java.util.UUID;
 
+/**
+ * The User class represents a user in the system with a unique identifier, name, and email address.
+ */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
+@Entity(name = "AppUser")
 public class User {
     @Id
     @GeneratedValue
