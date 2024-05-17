@@ -4,9 +4,7 @@ import lombok.*;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * The Session class represents a session in which users can participate and choose a restaurant to visit.
@@ -22,57 +20,34 @@ public class Session {
     @Type(type = "uuid-char")
     private UUID id;
 
-    @OneToMany(mappedBy = "session")
-    private List<Restaurant> restaurants;
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "session_restaurants",
+            joinColumns = @JoinColumn(name = "session_id"),
+            inverseJoinColumns = @JoinColumn(name = "restaurant_id")
+    )
+    @Builder.Default
+    private Set<Restaurant> restaurants = new HashSet<>();
+
+
 
     @ManyToOne
     @JoinColumn(name = "creator_id", nullable = false)
     private User creator;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "session_users",
             joinColumns = @JoinColumn(name = "session_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private List<User> participants;
+    @Builder.Default
+    private Set<User> participants = new HashSet<>();
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "picked_restaurant_id")
     private Restaurant pickedRestaurant;
 
     private boolean isActive = false;
 
-    public void addRestaurant(Restaurant restaurant) {
-        if (!isActive) {
-            throw new IllegalStateException("Session already ended.");
-        }
-        this.restaurants.add(restaurant);
-        restaurant.setSession(this);
-    }
-
-    public void addParticipant(User user) {
-        if (!isActive) {
-            throw new IllegalStateException("Session already ended.");
-        }
-        this.participants.add(user);
-    }
-
-    public void endSession() {
-        if (!isActive) {
-            throw new IllegalStateException("Session already ended.");
-        }
-
-        this.isActive = false;
-        int randomIndex = new Random().nextInt(restaurants.size());
-        pickedRestaurant = restaurants.get(randomIndex);
-    }
-
-    public Restaurant getPickedRestaurant() {
-        if (!isActive) {
-            return this.pickedRestaurant;
-        } else {
-            throw new RuntimeException("Session is still running");
-        }
-    }
 }

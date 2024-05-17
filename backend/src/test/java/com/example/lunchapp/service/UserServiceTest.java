@@ -58,6 +58,10 @@ public class UserServiceTest {
         verify(userRepository, times(1)).findById(id);
     }
 
+    /**
+     * Test case for the {@link UserService#getUserById(UUID)} method when user is not found by id.
+     * It verifies that the method throws a RuntimeException and calls the {@link UserRepository#findById(UUID)} method once with the specified id.
+     */
     @Test
     public void getUserByIdNotFoundTest() {
         UUID id = UUID.randomUUID();
@@ -79,6 +83,12 @@ public class UserServiceTest {
         verify(userRepository, times(1)).save(user);
     }
 
+    /**
+     * Deletes a user with the specified ID.
+     *
+     * @param id The ID of the user to delete.
+     * @throws RuntimeException If the user is not found.
+     */
     @Test
     public void deleteUserTest() {
         UUID id = UUID.randomUUID();

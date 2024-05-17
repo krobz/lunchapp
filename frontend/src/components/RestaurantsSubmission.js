@@ -9,19 +9,16 @@ import api from '../services/api';
  * @returns {JSX.Element} - The component JSX.
  */
 const RestaurantSubmission = ({ sessionId }) => {
-    const [restaurant, setRestaurant] = useState('');
+    const [restaurantName, setRestaurant] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             const userId = localStorage.getItem('userId'); // userId is stored in local storage
             if (userId) {
-                const restaurantToAdd = {
-                    name: restaurant,
-                };
                 const addRestaurantRequest = {
                     userId,
-                    restaurant: restaurantToAdd,
+                    restaurantName,
                 };
                 await api.post(`sessions/${sessionId}/restaurants`, addRestaurantRequest);
                 alert('Restaurant submitted successfully!');
@@ -37,7 +34,7 @@ const RestaurantSubmission = ({ sessionId }) => {
         <form onSubmit={handleSubmit}>
             <input
                 type="text"
-                value={restaurant}
+                value={restaurantName}
                 onChange={(e) => setRestaurant(e.target.value)}
                 placeholder="Restaurant Name"
             />

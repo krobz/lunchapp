@@ -18,6 +18,6 @@ public class AddRestaurantRequest{
     @NotNull(message = "User Id cannot be null")
     private UUID userId;
 
-    @NotNull(message = "Restaurant cannot be null")
-    private Restaurant restaurant;
+    @NotNull(message = "Restaurant name cannot be null")
+    private String restaurantName;
 }

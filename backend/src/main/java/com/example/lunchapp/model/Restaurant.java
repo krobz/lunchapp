@@ -21,8 +21,4 @@ public class Restaurant {
     private UUID id;
 
     private String name;
-
-    @ManyToOne
-    @JoinColumn(name = "session_id", nullable = false)
-    private Session session;
 }

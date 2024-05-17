@@ -46,6 +46,9 @@ public class UserControllerTest {
         assertEquals(2, users.size());
     }
 
+    /**
+     * Retrieves a user by their ID and performs the necessary assertions to validate the functionality.
+     */
     @Test
     public void getUserByIdTest() {
         User user = new User();

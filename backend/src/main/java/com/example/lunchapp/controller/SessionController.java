@@ -41,6 +41,25 @@ public class SessionController {
     }
 
     /**
+     * Retrieves a session by its ID.
+     *
+     * @param sessionId The ID of the session to retrieve.
+     * @return The ResponseEntity containing the session if found, or an error message if something wrong.
+     */
+    @Operation(summary = "Get a session by ID")
+    @GetMapping("/{sessionId}")
+    public ResponseEntity<?> getSessionById(@PathVariable UUID sessionId) {
+        log.debug("getSessionById API called with sessionId: {}", sessionId);
+        try {
+            Session session = sessionService.getSessionById(sessionId);
+            return ResponseEntity.ok(session);
+        } catch (RuntimeException e) {
+            log.error("Error fetching session with sessionId: {}", sessionId, e);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    /**
      * Creates a new session with the specified creator ID.
      *
      * @param creatorId the ID of the user who is creating the session
@@ -113,8 +132,12 @@ public class SessionController {
             return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
         }
 
+        Restaurant restaurant = Restaurant.builder()
+                .name(request.getRestaurantName())
+                .build();
+
         log.debug("addRestaurant is called for session Id {} and request {}", sessionId, request);
-        sessionService.addRestaurantAsync(sessionId, request.getUserId(), request.getRestaurant());
+        sessionService.addRestaurantAsync(sessionId, request.getUserId(), restaurant);
         return ResponseEntity.ok().build();
     }
 

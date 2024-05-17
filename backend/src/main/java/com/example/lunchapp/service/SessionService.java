@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -39,6 +40,11 @@ public class SessionService {
         return sessionRepository.findAll();
     }
 
+    public Session getSessionById(UUID sessionId) {
+        return sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new RuntimeException("Session not found"));
+    }
+
     public Session createSession(UUID creatorId) {
         log.debug("Starting creating session for creator id {}", creatorId);
         Session session;
@@ -52,7 +58,7 @@ public class SessionService {
                     .creator(creator)
                     .isActive(true)
                     .build();
-            session.addParticipant(creator);
+            addParticipant(session, creator);
             sessionRepository.save(session);
             log.debug("Finished creating session for creator id {}", creatorId);
         } catch (Exception e) {
@@ -76,14 +82,15 @@ public class SessionService {
         log.debug("Starting inviting user to session for session id {}, inviter id {}, and invitee id {}", sessionId, inviterId, inviteeId);
 
         try {
-            Session session = sessionRepository.findById(sessionId)
-                    .orElseThrow(() -> {
-                        log.error("Session not found with id {}", sessionId);
-                        return new RuntimeException("Session not found");
-                    });
+            Session session = sessionRepository.findWithParticipantsandRestaurantsById(sessionId);
+            if (session == null) {
+                throw new RuntimeException("Session not found");
+            }
+
             if (!session.isActive()) {
                 throw new IllegalStateException("Cannot join a session that has already ended.");
             }
+
             User inviter = userRepository.findById(inviterId)
                     .orElseThrow(() -> {
                         log.error("User not found with id {}", inviterId);
@@ -101,7 +108,7 @@ public class SessionService {
                         log.error("User not found with id {}", inviteeId);
                         return new RuntimeException("User not found");
                     });
-            session.addParticipant(invitee);
+            addParticipant(session, invitee);
             sessionRepository.save(session);
 
             log.debug("Finished inviting user to session for session id {}, inviter id {}, and invitee id {}", sessionId, inviterId, inviteeId);
@@ -115,11 +122,11 @@ public class SessionService {
     public CompletableFuture<Void> addRestaurantAsync(UUID sessionId, UUID userId, Restaurant restaurant) {
         log.debug("Adding restaurant to session {}, by user id {}", sessionId, userId);
         try {
-            Session session = sessionRepository.findById(sessionId)
-                    .orElseThrow(() -> {
-                        log.error("Session not found with id {}", sessionId);
-                        return new RuntimeException("Session not found");
-                    });
+            Session session = sessionRepository.findWithParticipantsandRestaurantsById(sessionId);
+            if (session == null) {
+                throw new RuntimeException("Session not found");
+            }
+
 
             User user = userRepository.findById(userId).orElseThrow(() -> {
                 log.error("User not authorized with id {}", userId);
@@ -130,10 +137,14 @@ public class SessionService {
                 log.error("Non-participant user attempted to add restaurant for session id {} and user id {}", sessionId, userId);
                 throw new IllegalStateException("Only participants of the session can add restaurants.");
             }
-            restaurant.setSession(session);
-            session.addRestaurant(restaurant);
-            // save session and restaurant
-            restaurantRepository.save(restaurant);
+
+            Restaurant existingRestaurant = restaurantRepository.findByName(restaurant.getName());
+            // When adding a new restaurant
+            if (existingRestaurant == null) {
+                addRestaurant(session, restaurant);
+                restaurantRepository.save(restaurant);
+            }
+            // save session
             sessionRepository.save(session);
 
             log.debug("Finished adding restaurant to session {}, by user id {}", sessionId, userId);
@@ -151,11 +162,56 @@ public class SessionService {
         if (!session.getCreator().getId().equals(userId)) {
             throw new IllegalStateException("Only the creator of the session can end the session.");
         }
-        session.endSession();
+        endSession(session);
         Restaurant pickedRestaurant = session.getPickedRestaurant();
         log.debug("Finished endSession for session Id {} and user Id {}. Picked Restaurant: {}.", sessionId, userId, pickedRestaurant.getName());
         return pickedRestaurant;
     }
 
+    /**
+     * Adds a restaurant to the session.
+     *
+     * @param session the session to add the restaurant to
+     * @param restaurant the restaurant to be added
+     * @throws IllegalStateException if the session is not active (ended session)
+     */
+    public void addRestaurant(Session session, Restaurant restaurant) {
+        if (!session.isActive()) {
+            throw new IllegalStateException("Session already ended.");
+        }
+        session.getRestaurants().add(restaurant);
+    }
+
+    /**
+     * Adds a participant to the given session.
+     *
+     * @param session the session to add the participant to
+     * @param user the user to add as a participant
+     * @throws IllegalStateException if the session is not active
+     */
+    public void addParticipant(Session session, User user) {
+        if (!session.isActive()) {
+            throw new IllegalStateException("Session already ended.");
+        }
+        session.getParticipants().add(user);
+    }
+
+    public void endSession(Session session) {
+        if (!session.isActive()) {
+            throw new IllegalStateException("Session already ended.");
+        }
+
+        session.setActive(false);
+        int size = session.getRestaurants().size();
+        int itemIndex = new Random().nextInt(size);
+        int i = 0;
+        for(Restaurant restaurant : session.getRestaurants()) {
+            if (i == itemIndex) {
+                session.setPickedRestaurant(restaurant);
+                break;
+            }
+            i++;
+        }
+    }
 
 }

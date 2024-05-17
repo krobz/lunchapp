@@ -1,24 +1,26 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
-/**
- * Represents a function component that creates a session.
- *
- * @returns {JSX.Element} - The rendered form for creating a session.
- */
 const SessionCreator = () => {
-    const [creatorId, setCreatorId] = useState('');
+    const navigate = useNavigate();
 
     const handleSubmit = async event => {
         event.preventDefault();
+        const creatorId = localStorage.getItem('userId');
         try {
             // Construct the creation request
             const creationRequest = { creatorId };
 
-            // Call the create API endpoint
-            const response = await api.post(`sessions/create`, null, { params : creationRequest });
+            const response = await api.post(`sessions/create`, null, { params: creationRequest });
 
-            alert('Session created successfully!');
+            // Store the created session ID in localStorage
+            const sessionId = response.data.id;
+            localStorage.setItem('createdSessionId', sessionId);
+
+            // Navigate to the session's page
+            navigate(`/session/${sessionId}`);
+
         } catch (error) {
             console.error('Failed to create a session', error);
             if (error.response && error.response.data) {
@@ -31,12 +33,6 @@ const SessionCreator = () => {
 
     return (
         <form onSubmit={handleSubmit}>
-            <input
-                type="text"
-                placeholder="Enter the Creator ID"
-                value={creatorId}
-                onChange={event => setCreatorId(event.target.value)}
-            />
             <button type="submit">Create Session</button>
         </form>
     );
