@@ -14,6 +14,7 @@ public class LunchappApplication {
         System.setProperty("USER_NAME", dotenv.get("USER_NAME"));
         System.setProperty("USER_PASSWORD", dotenv.get("USER_PASSWORD"));
         System.setProperty("API_KEY", dotenv.get("API_KEY"));
+        System.setProperty("JWT_SECRET", dotenv.get("JWT_SECRET"));
         SpringApplication.run(LunchappApplication.class, args);
     }
 

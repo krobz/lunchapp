@@ -2,6 +2,7 @@ package com.example.lunchapp.controller;
 
 import com.example.lunchapp.model.User;
 import com.example.lunchapp.service.UserService;
+import com.example.lunchapp.util.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,9 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Operation(summary = "Get all users")
     @GetMapping
@@ -77,21 +81,22 @@ public class UserController {
     @Operation(summary = "Create new user")
     @PostMapping
     public ResponseEntity<?> createUser(@Valid @RequestBody User user, BindingResult bindingResult) {
-
-        // validate the param
         if (bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
         }
 
-        User createdUser = null;
+        User createdUser;
         try {
             createdUser = userService.createUser(user);
         } catch (Exception e) {
             log.error("An error occurred while creating a user", e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+
+        String token = jwtUtil.generateToken(createdUser.getId().toString());
         log.info("Created user. ID of the created user: {}", createdUser.getId());
-        return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+
+        return ResponseEntity.ok().header("Authorization", "Bearer " + token).body(createdUser);
     }
 
     @Operation(summary = "Delete existing user")

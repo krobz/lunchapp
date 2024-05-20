@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import org.hibernate.annotations.Type;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -27,6 +28,8 @@ public class User {
     private UUID id;
 
     @NotBlank(message = "Name is mandatory")
+    @Column(unique=true)
     private String name;
+
     private String email;
 }

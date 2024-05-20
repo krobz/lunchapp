@@ -4,8 +4,10 @@ import com.example.lunchapp.model.User;
 import com.example.lunchapp.repository.UserRepository;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityExistsException;
 import java.util.List;
 import java.util.UUID;
 
@@ -60,9 +62,15 @@ public class UserService {
 
     public User createUser(User user) {
         log.debug("Executing createUser for user {}", user);
-        User savedUser = userRepository.save(user);
-        log.debug("Created user with id {}", savedUser.getId());
-        return savedUser;
+        try {
+            User savedUser = userRepository.save(user);
+            log.debug("Created user with id {}", savedUser.getId());
+            return savedUser;
+        } catch (DataIntegrityViolationException e) {
+            String message = "A user with the same name already exists.";
+            log.error(message, e);
+            throw new EntityExistsException(message, e);
+        }
     }
 
     public void deleteUser(UUID id) {

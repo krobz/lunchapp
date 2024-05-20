@@ -89,7 +89,13 @@ REACT_APP_API_KEY=1234567890abcdef1234567890abcdef
 3. run 'npm start'
 4. You could call the api and do operations by click link and button shown in the page.
 
-
+### How to test (To make it easier to test, the example only include 2 users)
+1. In the frontend page, create user A and then create session. Then you will have options to submit restaurant, invite
+other users or end session.
+2. Open another browse, create another user B. Then A click invite user link and invite B.\
+3. User B copy the session link and navigate to session. User B is able to submit restaurant now. And all users in
+the current session can view restaurant submitted.
+4. User A (creator of the session) can end the session and a random restaurant is picked.
 
 
 

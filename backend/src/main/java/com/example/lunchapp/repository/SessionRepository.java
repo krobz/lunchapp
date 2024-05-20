@@ -27,4 +27,5 @@ public interface SessionRepository extends JpaRepository<Session, UUID> {
 
     @EntityGraph(attributePaths = {"pickedRestaurant"})
     Session findWithPickedRestaurantById(UUID sessionId);
+
 }

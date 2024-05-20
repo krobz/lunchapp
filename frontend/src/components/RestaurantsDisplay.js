@@ -12,6 +12,10 @@ const RestaurantsDisplay = ({ sessionId }) => {
     const [restaurants, setRestaurants] = useState([]);
 
     useEffect(() => {
+        const interval = setInterval(() => {
+            fetchRestaurants();
+        }, 30000); // 每30秒更新一次餐厅列表
+
         const fetchRestaurants = async () => {
             try {
                 const response = await api.get(`/sessions/${sessionId}`);
@@ -22,6 +26,7 @@ const RestaurantsDisplay = ({ sessionId }) => {
         };
 
         fetchRestaurants();
+        return () => clearInterval(interval);
     }, [sessionId]);
 
     return (

@@ -9,24 +9,22 @@ import api from '../services/api';
  * @returns {JSX.Element} - The component JSX.
  */
 const RestaurantSubmission = ({ sessionId }) => {
-    const [restaurantName, setRestaurant] = useState('');
+    const [restaurantName, setRestaurantName] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!restaurantName) {
+            alert('Please enter a restaurant name.');
+            return;
+        }
         try {
-            const userId = localStorage.getItem('userId'); // userId is stored in local storage
-            if (userId) {
-                const addRestaurantRequest = {
-                    userId,
-                    restaurantName,
-                };
-                await api.post(`sessions/${sessionId}/restaurants`, addRestaurantRequest);
-                alert('Restaurant submitted successfully!');
-            } else {
-                alert('User ID not found, please log in');
-            }
+            const addRestaurantRequest = { restaurantName };
+            await api.post(`sessions/${sessionId}/restaurants`, addRestaurantRequest);
+            alert('Restaurant submitted successfully!');
+            setRestaurantName('');  // Clear the input after successful submission
         } catch (error) {
-            console.error('Failed to submit restaurant', error);
+            console.error('Failed to submit restaurant:', error.response ? error.response.data : 'Unknown error');
+            alert('Failed to submit restaurant. Please try again.');
         }
     };
 
@@ -35,7 +33,7 @@ const RestaurantSubmission = ({ sessionId }) => {
             <input
                 type="text"
                 value={restaurantName}
-                onChange={(e) => setRestaurant(e.target.value)}
+                onChange={(e) => setRestaurantName(e.target.value)}
                 placeholder="Restaurant Name"
             />
             <button type="submit">Submit Restaurant</button>

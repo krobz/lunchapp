@@ -1,35 +1,21 @@
 import React, { useState } from 'react';
 import api from '../services/api';
 
-/**
- * Represents a form for inviting a user to a session.
- *
- * @param {Object} props - The properties for the InviteForm component.
- * @param {string} props.sessionId - The ID of the session to invite the user to.
- *
- * @returns {JSX.Element} The InviteForm component.
- */
 const InviteForm = ({ sessionId }) => {
     const [inviteeName, setInviteeName] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            // Fetch the ID of the invitee using their name
-            const userResponse = await api.get(`/name/${inviteeName}`);
-            const inviteeId = userResponse.data.uuid;
+            const userResponse = await api.get(`users/name/${inviteeName}`);
+            const inviteeId = userResponse.data.id;
 
-            const inviterId = localStorage.getItem('userId');
+            const response = await api.post(`sessions/${sessionId}/invite`, { inviteeId });
 
-            // Construct the invite request
-            const inviteUsersRequest = { inviterId, inviteeId };
-
-            // Call the invite API endpoint
-            await api.post(`sessions/${sessionId}/invite`, inviteUsersRequest);
-
-            alert('User invited successfully!');
+            alert(`User invited successfully! SessionId: ${response.data}`);
         } catch (error) {
             console.error('Failed to invite user', error);
+            alert('Failed to invite user');
         }
     };
 

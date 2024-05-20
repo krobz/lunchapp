@@ -4,6 +4,7 @@ import SessionDisplay from '../components/SessionDisplay';
 import UserAdd from '../components/UserAdd';
 import SessionCreator from '../components/SessionCreator';
 import SessionNavigation from '../components/SessionNavigation';
+import JoinSessionForm from "../components/JoinSessionForm";
 
 // Router component for managing routing within the application.
 const Router = () => {
@@ -22,6 +23,7 @@ const Router = () => {
                 <Route path="/view-sessions/*" element={<SessionDisplay />} />
                 <Route path="/create-session" element={<SessionCreator />} />
                 <Route path="/session/:id/*" element={<SessionNavigation />} />
+                <Route path="/join-session" element={<JoinSessionForm />} />
             </Routes>
         </BrowserRouter>
     );

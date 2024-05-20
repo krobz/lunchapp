@@ -7,20 +7,15 @@ const SessionCreator = () => {
 
     const handleSubmit = async event => {
         event.preventDefault();
-        const creatorId = localStorage.getItem('userId');
         try {
-            // Construct the creation request
-            const creationRequest = { creatorId };
-
-            const response = await api.post(`sessions/create`, null, { params: creationRequest });
-
+            // 直接发送创建会话的请求，不需要传递creatorId
+            const response = await api.post('/sessions/create');
             // Store the created session ID in localStorage
             const sessionId = response.data.id;
             localStorage.setItem('createdSessionId', sessionId);
 
             // Navigate to the session's page
             navigate(`/session/${sessionId}`);
-
         } catch (error) {
             console.error('Failed to create a session', error);
             if (error.response && error.response.data) {

@@ -15,8 +15,6 @@ import java.util.UUID;
 @Getter
 @Setter
 public class InviteUsersRequest {
-    @NotNull(message = "Inviter Id cannot be null")
-    private UUID inviterId;
 
     @NotNull(message = "Invitee Id cannot be null")
     private UUID inviteeId;
